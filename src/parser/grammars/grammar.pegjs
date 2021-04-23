@@ -2,12 +2,12 @@
 // ==========================
 //
 
-Main = Expression
+Main = expression:Expression comment:Comment? { return expression; }
 
 
 // Expression / roll groups
 RollGroup
-  = "{" _ expr:Expression exprs:(_ "," _ Expression)* _ "}" modifiers:Modifier* {
+  = "{" _ expr:Expression exprs:(_ "," _ Expression)* _ "}" modifiers:Modifier* comment:InlineComment? {
     return new RollGroup(
       [
         expr,
@@ -22,7 +22,7 @@ RollGroup
 
 // Dice
 
-Dice = die:(StandardDie / PercentileDie / FudgeDie) modifiers:Modifier* {
+Dice = die:(StandardDie / PercentileDie / FudgeDie) modifiers:Modifier* comment:InlineComment? {
   die.modifiers = Object.assign({}, ...modifiers.map(item => {
     return {[item.name]: item};
   }));
@@ -160,6 +160,12 @@ Expression
         }).flat(2)
     ]
   }
+
+Comment
+  = _"#" _ comment:.*
+
+InlineComment
+  = "[" _ comment:[^\]]* _ "]"
 
 Factor
   = MathFunction
