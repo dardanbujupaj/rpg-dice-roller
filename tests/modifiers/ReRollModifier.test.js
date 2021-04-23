@@ -1,6 +1,6 @@
 import { StandardDice } from '../../src/dice/index.js';
 import { DieActionValueError } from '../../src/exceptions/index.js';
-import { ComparisonModifier, ReRollModifier } from '../../src/modifiers/index.js';
+import { ComparisonModifier, Modifier, ReRollModifier } from '../../src/modifiers/index.js';
 import ComparePoint from '../../src/ComparePoint.js';
 import RollResult from '../../src/results/RollResult.js';
 import RollResults from '../../src/results/RollResults.js';
@@ -66,11 +66,21 @@ describe('ReRollModifier', () => {
     });
   });
 
+  describe('Limit', () => {
+    test('gets set in constructor', () => {
+      const mod = new ReRollModifier(35);
+
+      expect(mod.maxIterations).toBe(35);
+      expect(mod.notation).toBe('r35');
+    });
+  });
+
   describe('Once', () => {
     test('gets set in constructor', () => {
       const mod = new ReRollModifier(true);
 
       expect(mod.once).toBe(true);
+      expect(mod.maxIterations).toBe(1);
       expect(mod.notation).toBe('ro');
     });
 
@@ -78,24 +88,43 @@ describe('ReRollModifier', () => {
       const mod = new ReRollModifier(true);
 
       expect(mod.once).toBe(true);
+      expect(mod.maxIterations).toBe(1);
       expect(mod.notation).toBe('ro');
 
       mod.once = false;
 
       expect(mod.once).toBe(false);
+      expect(mod.maxIterations).toBe(Modifier.defaultMaxIterations);
       expect(mod.notation).toBe('r');
     });
 
-    test('cast to boolean', () => {
-      expect((new ReRollModifier('foo')).once).toBe(true);
-      expect((new ReRollModifier('')).once).toBe(false);
-      expect((new ReRollModifier('0')).once).toBe(true);
-      expect((new ReRollModifier(0)).once).toBe(false);
-      expect((new ReRollModifier(1)).once).toBe(true);
-      expect((new ReRollModifier([])).once).toBe(true);
-      expect((new ReRollModifier({})).once).toBe(true);
+    test('must be boolean or number', () => {
+      expect(() => {
+        new ReRollModifier('foo');
+      }).toThrow(TypeError);
+
+      expect(() => {
+        new ReRollModifier('foo');
+      }).toThrow(TypeError);
+
+      expect(() => {
+        new ReRollModifier([]);
+      }).toThrow(TypeError);
+
+      expect(() => {
+        new ReRollModifier({});
+      }).toThrow(TypeError);
+    });
+
+    test('falsey is set to default max', () => {
       expect((new ReRollModifier(null)).once).toBe(false);
+      expect((new ReRollModifier(null)).maxIterations).toBe(Modifier.defaultMaxIterations);
+
       expect((new ReRollModifier(undefined)).once).toBe(false);
+      expect((new ReRollModifier(undefined)).maxIterations).toBe(Modifier.defaultMaxIterations);
+
+      expect((new ReRollModifier('')).once).toBe(false);
+      expect((new ReRollModifier('')).maxIterations).toBe(Modifier.defaultMaxIterations);
     });
   });
 
@@ -137,13 +166,13 @@ describe('ReRollModifier', () => {
       // json encode, to get the encoded string, then decode so we can compare the object
       // this allows us to check that the output is correct, but ignoring the order of the
       // returned properties
-      expect(JSON.parse(JSON.stringify(mod))).toEqual({
+      expect(JSON.parse(JSON.stringify(mod))).toEqual(expect.objectContaining({
         comparePoint: cp.toJSON(),
+        maxIterations: 1,
         name: 're-roll',
         notation: 'ro<=3',
-        once: true,
         type: 'modifier',
-      });
+      }));
     });
 
     test('toString output is correct', () => {
