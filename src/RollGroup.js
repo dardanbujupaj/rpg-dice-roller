@@ -39,11 +39,13 @@ class RollGroup {
    *
    * @param {Array.<Array.<StandardDice|string|number>>} [expressions=[]] List of sub-rolls
    * @param {Map<string, Modifier>|Modifier[]|{}|null} [modifiers=[]] The modifiers that affect the
+   * @param {string|null} [modifiers=[]] The modifiers that affect the
    * group
    */
-  constructor(expressions = [], modifiers = []) {
+  constructor(expressions = [], modifiers = [], comment = null) {
     this.expressions = expressions;
     this.modifiers = modifiers;
+    this.comment = comment;
   }
 
   /**
@@ -156,6 +158,16 @@ class RollGroup {
   }
 
   /**
+   * Comment for the roll group if available.
+   * e.g. {1d20}[Fire] -> 'Fire'
+   * 
+   * @returns {string|null}
+   */
+  get comment() {
+    return comment || null;
+  }
+
+  /**
    * Run the sub-roll expressions for the group.
    *
    * @example <caption>`{4d6+4/1d6, 2d10/3}k1`</caption>
@@ -252,6 +264,7 @@ class RollGroup {
    *  modifiers: (Map<string, Modifier>|null),
    *  type: string,
    *  expressions: Array.<Array.<StandardDice|string|number>>
+   *  type: (string|null),
    * }}
    */
   toJSON() {
@@ -262,6 +275,7 @@ class RollGroup {
       modifiers,
       notation,
       type: 'group',
+      comment
     };
   }
 

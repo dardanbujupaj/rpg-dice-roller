@@ -15,7 +15,8 @@ RollGroup
       ],
       Object.assign({}, ...modifiers.map(item => {
         return {[item.name]: item};
-      }))
+      })),
+      comment
     );
   }
 
@@ -26,6 +27,10 @@ Dice = die:(StandardDie / PercentileDie / FudgeDie) modifiers:Modifier* comment:
   die.modifiers = Object.assign({}, ...modifiers.map(item => {
     return {[item.name]: item};
   }));
+
+  if (comment) {
+    die.comment = comment;
+  }
 
   return die;
 }
@@ -162,10 +167,14 @@ Expression
   }
 
 Comment
-  = _"#" _ comment:.*
+  = _ "#" _ comment:.* {
+    return text();
+  }
 
 InlineComment
-  = "[" _ comment:[^\]]* _ "]"
+  = "[" _ comment:[^\]]* _ "]" {
+    return text();
+  }
 
 Factor
   = MathFunction

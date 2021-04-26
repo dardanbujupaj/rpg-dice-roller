@@ -1,6 +1,6 @@
 // import { SyntaxError } from '../../src/parser/grammars/grammar.js';
-// import StandardDice from '../../src/dice/StandardDice.js';
-// import RollGroup from '../../src/RollGroup.js';
+import StandardDice from '../../src/dice/StandardDice.js';
+import RollGroup from '../../src/RollGroup.js';
 import Parser from '../../src/parser/Parser.js';
 
 describe('Parsing', () => {
@@ -29,17 +29,16 @@ describe('Parsing', () => {
       });
 
       test('can parse `{1d6+1d4} # Test roll`', () => {
-        const notation = '{1d6+1d4} #Test roll';
+        const notation = '{1d6+1d4} # Test roll';
 
         const parsed = Parser.parse(notation);
 
         expect(parsed).toBeInstanceOf(Array);
         expect(parsed).toHaveLength(1);
 
-        /*
         const dice = [
-          new StandardDice(6),
-          new StandardDice(4),
+          new StandardDice(6, 1, {}),
+          new StandardDice(4, 1, {}),
         ];
 
         const group = parsed[0];
@@ -54,8 +53,8 @@ describe('Parsing', () => {
         expect(group.expressions[0][2]).toEqual(dice[1]);
 
         expect(group.modifiers).toEqual(new Map());
-        expect(group.notation).toEqual(notation);
-        */
+
+        // expect(notation).toEqual(notation);
       });
     });
 
@@ -96,6 +95,16 @@ describe('Parsing', () => {
 
         expect(parsed).toBeInstanceOf(Array);
         expect(parsed).toHaveLength(1);
+        expect(parsed[0].comment).toEqual('[❄️🥶 Damage]');
+      });
+
+      test('can parse `{1d20 + 1d4 + 5}[Attack with bonus]`', () => {
+        const notation = '{1d20 + 1d4 + 5}[Attack with bonus]';
+        const parsed = Parser.parse(notation);
+
+        expect(parsed).toBeInstanceOf(Array);
+        expect(parsed).toHaveLength(1);
+        expect(parsed[0].comment).toEqual('[Attack with bonus]');
       });
     });
 
